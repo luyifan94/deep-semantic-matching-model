@@ -1,9 +1,5 @@
 import tensorflow as tf
 
-'''
-inputs是一个形如(batch_size, seq_len, word_size)的张量；
-函数返回一个形如(batch_size, seq_len, position_size)的位置张量。
-'''
 def Position_Embedding(inputs, position_size):
     batch_size,seq_len = tf.shape(inputs)[0],tf.shape(inputs)[1]
     position_j = 1. / tf.pow(10000., \
@@ -18,13 +14,6 @@ def Position_Embedding(inputs, position_size):
                          + tf.zeros((batch_size, seq_len, position_size))
     return position_embedding
 
-
-'''
-inputs是一个二阶以上的张量，代表输入序列，比如形如(batch_size, seq_len, input_size)的张量；
-seq_len是一个形如(batch_size,)的张量，代表每个序列的实际长度，多出部分都被忽略；
-mode分为mul和add，mul是指把多出部分全部置零，一般用于全连接层之前；
-add是指把多出部分全部减去一个大的常数，一般用于softmax之前。
-'''
 def Mask(inputs, seq_len, mode='mul'):
     if seq_len == None:
         return inputs
@@ -37,11 +26,6 @@ def Mask(inputs, seq_len, mode='mul'):
         if mode == 'add':
             return inputs - (1 - mask) * 1e12
 
-'''
-普通的全连接
-inputs是一个二阶或二阶以上的张量，即形如(batch_size,...,input_size)。
-只对最后一个维度做矩阵乘法，即输出一个形如(batch_size,...,ouput_size)的张量。
-'''
 def Dense(inputs, ouput_size, bias=True, seq_len=None):
     input_size = int(inputs.shape[-1])
     W = tf.Variable(tf.random_uniform([input_size, ouput_size], -0.05, 0.05))
@@ -57,9 +41,6 @@ def Dense(inputs, ouput_size, bias=True, seq_len=None):
         outputs = Mask(outputs, seq_len, 'mul')
     return outputs
 
-'''
-Multi-Head Attention的实现
-'''
 def Attention(Q, K, V, nb_head, size_per_head, Q_len=None, V_len=None):
     #对Q、K、V分别作线性映射
     Q = Dense(Q, nb_head * size_per_head, False)
